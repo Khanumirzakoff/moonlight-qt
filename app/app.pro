@@ -2,10 +2,10 @@ QT += core quick network quickcontrols2 svg
 CONFIG += c++11
 
 unix:!macx {
-    TARGET = moonlight
+    TARGET = xon-cloud-gaming
 } else {
     # On macOS, this is the name displayed in the global menu bar
-    TARGET = Moonlight
+    TARGET = xon-cloud-gaming
 }
 
 include(../globaldefs.pri)
@@ -186,8 +186,10 @@ SOURCES += \
     backend/computermanager.cpp \
     backend/boxartmanager.cpp \
     backend/richpresencemanager.cpp \
+    backend/sessionmanager.cpp \
     cli/commandlineparser.cpp \
     cli/listapps.cpp \
+    cli/tokenstream.cpp \
     cli/quitstream.cpp \
     cli/startstream.cpp \
     settings/compatfetcher.cpp \
@@ -229,8 +231,10 @@ HEADERS += \
     backend/computermanager.h \
     backend/boxartmanager.h \
     backend/richpresencemanager.h \
+    backend/sessionmanager.h \
     cli/commandlineparser.h \
     cli/listapps.h \
+    cli/tokenstream.h \
     cli/quitstream.h \
     cli/startstream.h \
     settings/streamingpreferences.h \

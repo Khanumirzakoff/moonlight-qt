@@ -148,8 +148,23 @@ GlobalCommandLineParser::~GlobalCommandLineParser()
 {
 }
 
+QString GlobalCommandLineParser::getToken() const
+{
+    return m_Token;
+}
+
 GlobalCommandLineParser::ParseResult GlobalCommandLineParser::parse(const QStringList &args)
 {
+    // First, check if we were launched from a URL
+    for (const QString& arg : args) {
+        if (arg.startsWith("xon-cloud-gaming://launch?token=", Qt::CaseInsensitive)) {
+            m_Token = arg.mid(QString("xon-cloud-gaming://launch?token=").length());
+            if (!m_Token.isEmpty()) {
+                return TokenRequested;
+            }
+        }
+    }
+
     CommandLineParser parser;
     parser.setupCommonOptions();
     parser.setApplicationDescription(

@@ -5,3 +5,6 @@
 build/
 config.tests/*/.qmake.stash
 config.tests/*/Makefile
+
+# XON Cloud Gaming Backend
+xon-cloud-gaming-backend/node_modules/

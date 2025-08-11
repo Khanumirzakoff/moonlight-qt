@@ -36,6 +36,7 @@
 #include "cli/quitstream.h"
 #include "cli/startstream.h"
 #include "cli/pair.h"
+#include "cli/tokenstream.h"
 #include "cli/commandlineparser.h"
 #include "path.h"
 #include "utils.h"
@@ -314,9 +315,9 @@ int main(int argc, char *argv[])
     // Set these here to allow us to use the default QSettings constructor.
     // These also ensure that our cache directory is named correctly. As such,
     // it is critical that these be called before Path::initialize().
-    QCoreApplication::setOrganizationName("Moonlight Game Streaming Project");
-    QCoreApplication::setOrganizationDomain("moonlight-stream.com");
-    QCoreApplication::setApplicationName("Moonlight");
+    QCoreApplication::setOrganizationName("XON Cloud Gaming");
+    QCoreApplication::setOrganizationDomain("xon.uz");
+    QCoreApplication::setApplicationName("XON Cloud Gaming");
 
     if (QFile(QDir::currentPath() + "/portable.dat").exists()) {
         QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -790,6 +791,23 @@ int main(int argc, char *argv[])
             auto launcher = new CliListApps::Launcher(listParser.getHost(), listParser, &app);
             launcher->execute(new ComputerManager(StreamingPreferences::get()));
             hasGUI = false;
+            break;
+        }
+    case GlobalCommandLineParser::TokenRequested:
+        {
+            hasGUI = false;
+            auto launcher = new CliTokenStream::Launcher(parser.getToken(), StreamingPreferences::get(), &app);
+            QObject::connect(launcher, &CliTokenStream::Launcher::sessionReady,
+                             [](QString vmHost, QString sessionId) {
+                                 qInfo() << "Session Ready! Host:" << vmHost << "ID:" << sessionId;
+                                 QCoreApplication::quit();
+                             });
+            QObject::connect(launcher, &CliTokenStream::Launcher::failed,
+                             [](QString error) {
+                                 qCritical() << "Session Failed:" << error;
+                                 QCoreApplication::quit();
+                             });
+            launcher->execute();
             break;
         }
     }
