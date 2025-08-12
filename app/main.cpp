@@ -12,6 +12,10 @@
 #include <QElapsedTimer>
 #include <QTemporaryFile>
 #include <QRegularExpression>
+#include <QUrl>
+#include <QUrlQuery>
+
+#include "cli/tokenstream.h"
 
 // Don't let SDL hook our main function, since Qt is already
 // doing the same thing. This needs to be before any headers
@@ -304,6 +308,14 @@ LONG WINAPI UnhandledExceptionHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
 
 #endif
 
+// Helper function to extract the token from the custom URI
+QString extractTokenFromUri(const QString& uri)
+{
+    QUrl url(uri);
+    QUrlQuery query(url.query());
+    return query.queryItemValue("token");
+}
+
 int main(int argc, char *argv[])
 {
     SDL_SetMainReady();
@@ -314,9 +326,9 @@ int main(int argc, char *argv[])
     // Set these here to allow us to use the default QSettings constructor.
     // These also ensure that our cache directory is named correctly. As such,
     // it is critical that these be called before Path::initialize().
-    QCoreApplication::setOrganizationName("Moonlight Game Streaming Project");
-    QCoreApplication::setOrganizationDomain("moonlight-stream.com");
-    QCoreApplication::setApplicationName("Moonlight");
+    QCoreApplication::setOrganizationName("XON Cloud Gaming");
+    QCoreApplication::setOrganizationDomain("xon-cloud-gaming.com");
+    QCoreApplication::setApplicationName("X.O.N Cloud Gaming");
 
     if (QFile(QDir::currentPath() + "/portable.dat").exists()) {
         QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -564,8 +576,8 @@ int main(int argc, char *argv[])
     // Set our app name for SDL to use with PulseAudio and PipeWire. This matches what we
     // provide as our app name to libsoundio too. On SDL 2.0.18+, SDL_APP_NAME is also used
     // for screensaver inhibitor reporting.
-    SDL_SetHint(SDL_HINT_AUDIO_DEVICE_APP_NAME, "Moonlight");
-    SDL_SetHint(SDL_HINT_APP_NAME, "Moonlight");
+    SDL_SetHint(SDL_HINT_AUDIO_DEVICE_APP_NAME, "X.O.N Cloud Gaming");
+    SDL_SetHint(SDL_HINT_APP_NAME, "X.O.N Cloud Gaming");
 
     // We handle capturing the mouse ourselves when it leaves the window, so we don't need
     // SDL doing it for us behind our backs.
@@ -694,9 +706,9 @@ int main(int argc, char *argv[])
 #endif
 
     // This is necessary to show our icon correctly on Wayland
-    app.setDesktopFileName("com.moonlight_stream.Moonlight.desktop");
-    qputenv("SDL_VIDEO_WAYLAND_WMCLASS", "com.moonlight_stream.Moonlight");
-    qputenv("SDL_VIDEO_X11_WMCLASS", "com.moonlight_stream.Moonlight");
+    app.setDesktopFileName("com.xon-cloud-gaming.desktop");
+    qputenv("SDL_VIDEO_WAYLAND_WMCLASS", "com.xon-cloud-gaming");
+    qputenv("SDL_VIDEO_X11_WMCLASS", "com.xon-cloud-gaming");
 
     // Register our C++ types for QML
     qmlRegisterType<ComputerModel>("ComputerModel", 1, 0, "ComputerModel");
@@ -790,6 +802,30 @@ int main(int argc, char *argv[])
             auto launcher = new CliListApps::Launcher(listParser.getHost(), listParser, &app);
             launcher->execute(new ComputerManager(StreamingPreferences::get()));
             hasGUI = false;
+            break;
+        }
+    case GlobalCommandLineParser::TokenRequested:
+        {
+            initialView = "qrc:/gui/CliStartStreamSegue.qml";
+
+            // Find the URI argument and extract the token
+            QString uriString;
+            for (const QString& arg : app.arguments()) {
+                if (arg.startsWith("xon-cloud-gaming://")) {
+                    uriString = arg;
+                    break;
+                }
+            }
+
+            if (!uriString.isEmpty()) {
+                QString token = extractTokenFromUri(uriString);
+                auto launcher = new CliTokenStream::Launcher(token, StreamingPreferences::get(), &app);
+                engine.rootContext()->setContextProperty("launcher", launcher);
+            } else {
+                qWarning() << "TokenRequested action was triggered, but no token URI was found.";
+                // Fallback to normal start
+                initialView = "qrc:/gui/PcView.qml";
+            }
             break;
         }
     }

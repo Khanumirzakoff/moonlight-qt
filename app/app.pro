@@ -1,12 +1,7 @@
 QT += core quick network quickcontrols2 svg
 CONFIG += c++11
 
-unix:!macx {
-    TARGET = moonlight
-} else {
-    # On macOS, this is the name displayed in the global menu bar
-    TARGET = Moonlight
-}
+TARGET = xon-cloud-gaming
 
 include(../globaldefs.pri)
 
@@ -174,6 +169,8 @@ macx {
 }
 
 SOURCES += \
+    backend/sessionmanager.cpp \
+    cli/tokenstream.cpp \
     backend/nvaddress.cpp \
     backend/nvapp.cpp \
     cli/pair.cpp \
@@ -214,6 +211,8 @@ SOURCES += \
     wm.cpp
 
 HEADERS += \
+    backend/sessionmanager.h \
+    cli/tokenstream.h \
     SDL_compat.h \
     backend/nvaddress.h \
     backend/nvapp.h \
@@ -561,9 +560,9 @@ unix:!macx: {
 }
 win32 {
     RC_ICONS = moonlight.ico
-    QMAKE_TARGET_COMPANY = Moonlight Game Streaming Project
-    QMAKE_TARGET_DESCRIPTION = Moonlight Game Streaming Client
-    QMAKE_TARGET_PRODUCT = Moonlight
+    QMAKE_TARGET_COMPANY = X.O.N Cloud Gaming
+    QMAKE_TARGET_DESCRIPTION = X.O.N Cloud Gaming Client
+    QMAKE_TARGET_PRODUCT = X.O.N Cloud Gaming
 
     CONFIG -= embed_manifest_exe
     QMAKE_LFLAGS += /MANIFEST:embed /MANIFESTINPUT:$${PWD}/Moonlight.exe.manifest

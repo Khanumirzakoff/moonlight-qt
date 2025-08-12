@@ -19,6 +19,7 @@ ApplicationWindow {
     property bool clearOnBack: false
 
     id: window
+    title: "X.O.N Cloud Gaming"
     width: 1280
     height: 600
 

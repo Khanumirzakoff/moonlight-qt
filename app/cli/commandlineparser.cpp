@@ -175,6 +175,9 @@ GlobalCommandLineParser::ParseResult GlobalCommandLineParser::parse(const QStrin
         parser.handleUnknownOptions();
         return NormalStartRequested;
     }
+    else if (args.filter(QRegularExpression("xon-cloud-gaming://.*")).count() > 0) {
+        return TokenRequested;
+    }
     else {
         // If users supply arguments that accept values prior to the "quit"
         // or "stream" positional arguments, we will not be able to correctly
